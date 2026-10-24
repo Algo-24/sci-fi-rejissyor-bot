@@ -1,6 +1,7 @@
 import os
 import re
 import asyncio
+import time
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile
@@ -72,14 +73,37 @@ async def cmd_ssenariy(message: Message):
         * **Audio FX / Sound Design:** ...
         """
 
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                temperature=0.7,
-            ),
-        )
+        # Avtomatik retry: 503 bo'lsa 3 marta qayta urinadi
+        MODELS = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+        response = None
+        last_error = None
+        for attempt in range(5):
+            for model_name in MODELS:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_INSTRUCTION,
+                            temperature=0.7,
+                        ),
+                    )
+                    break  # Muvaffaqiyatli bo'lsa chiqish
+                except Exception as e:
+                    last_error = e
+                    err_str = str(e)
+                    if '503' in err_str or 'UNAVAILABLE' in err_str:
+                        wait = 2 ** attempt  # 1, 2, 4, 8, 16 soniya
+                        print(f"[{model_name}] 503 xato, {wait}s kutilmoqda...")
+                        time.sleep(wait)
+                        continue
+                    else:
+                        raise  # Boshqa xatolar uchun darhol chiqish
+            if response:
+                break
+
+        if not response:
+            raise last_error
 
         output_dir = "/tmp/SENARIY"
         os.makedirs(output_dir, exist_ok=True)
