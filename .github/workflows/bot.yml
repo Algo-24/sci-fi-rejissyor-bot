@@ -1,0 +1,29 @@
+name: 🤖 Sci-Fi Bot 24/7
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'  # Har 5 soatda qayta ishga tushadi
+  workflow_dispatch:        # Qo'lda ham ishga tushirish mumkin
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300    # 5 soat ishlaydi, keyin yangi run boshlanadi
+
+    steps:
+      - name: Kodni yuklash
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 o'rnatish
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Kutubxonalar o'rnatish
+        run: pip install -r requirements.txt
+
+      - name: Telegram botni ishga tushirish
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python telegram_bot.py
