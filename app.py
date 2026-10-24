@@ -1,3 +1,4 @@
+import os
 import threading
 import asyncio
 import gradio as gr
@@ -18,11 +19,14 @@ def run_bot_in_thread():
 bot_thread = threading.Thread(target=run_bot_in_thread, daemon=True)
 bot_thread.start()
 
-# --- HuggingFace Spaces uchun Gradio UI (port 7860) ---
+# --- Render.com PORT env variable'dan oladi ---
+port = int(os.environ.get("PORT", 7860))
+
+# --- Gradio UI (UptimeRobot shu sahifani ping qiladi) ---
 with gr.Blocks() as demo:
     gr.Markdown("# 🤖 Sci-Fi Rejissyor Boti")
-    gr.Markdown("Telegram bot 24/7 faol ishlamoqda! ✅")
-    gr.Markdown("Bot orqali `/ssenariy [mavzu]` buyrug'ini yuboring.")
+    gr.Markdown("✅ Bot 24/7 faol ishlamoqda!")
+    gr.Markdown("Telegram'da `/ssenariy [mavzu]` buyrug'ini yuboring.")
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=port)
