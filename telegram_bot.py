@@ -109,3 +109,7 @@ async def start_bot():
     """Botni ishga tushiradi — app.py tomonidan chaqiriladi."""
     print("🤖 Telegram bot polling boshlandi...")
     await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(start_bot())
